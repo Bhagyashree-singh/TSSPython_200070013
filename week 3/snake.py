@@ -67,11 +67,10 @@ def create_food():
     the location of the food.
     """
     if food_spawn == True:
-        food_pos[0]=random.randint(1,720)
-        food_pos[1]=random.randint(1,480)
+        food_pos[0]=random.randint(20,700)
+        food_pos[1]=random.randint(20,460)
         food_spawn = False
-    pygame.draw.rect(game_window,(255,0,0),pygame.Rect(food_pos[0],food_pos[1],10,10))
-    pygame.display.flip()
+    pygame.draw.rect(game_window,(120,120,0),pygame.Rect(food_pos[0],food_pos[1],10,10))
 
 
 
@@ -100,27 +99,33 @@ def update_snake():
     
     if direction== 'DOWN':
         snake_pos[1] =snake_pos[1]+ 10
-    
-    for len in range(snake_length -1, 0,-1):
-        snake_body[len]=snake_body[len-1]
-    snake_body[0]=snake_pos 
-    diff_x=snake_body[len-1][0]-snake_body[len-2][0]
-    diff_y=snake_body[len-1][1]-snake_body[len-2][1]
+    snake_body.append([snake_pos[0], snake_pos[1]])
+    #snake eats
     if pygame.Rect(snake_pos[0], snake_pos[1], 10, 10).colliderect(food_pos[0], food_pos[1], 10, 10):   
         food_spawn = True
         score += 10
-        snake_body.append([snake_body[len-1][0]+diff_x,snake_body[len-1][1]+diff_y])
         snake_length+=1
-    for i in range(snake_length):
-        pygame.draw.rect(game_window, (255, 0, 0), pygame.Rect(snake_body[i][0], snake_body[i][1], 9, 9))
-    pygame.display.flip()
+    else:
+        snake_body.pop(0)
 
-    #pygame.display.update()           
+    
+    for i in snake_body:
+        pygame.draw.rect(game_window, (255, 0, 0),
+                         pygame.Rect(i[0],i[1], 9, 9))
+    
+
+    #snake goes out of frame, game ends     
     if snake_pos[0] <= 10 or snake_pos[0] >= frame_size_x - 10 or snake_pos[1] <= 10 or snake_pos[1] >= frame_size_x - 10:
         game_over()
     #for block in snake_body:
      #   pygame.draw.rect(game_window, (255, 0, 0), pygame.Rect(block[0], block[1], 9, 9))
-    
+    #if touches own body
+    #for bodypart in snake_body[1:]:
+     #   if snake_pos[0]==bodypart[0] and snake_pos[1]==bodypart[1]:
+      #      game_over()
+    for bodypart in snake_body[:-1]:
+        if pygame.Rect(snake_pos[0], snake_pos[1], 10, 10).colliderect(pygame.Rect(bodypart[0], bodypart[1], 10, 10)):
+            game_over()
 
 
 
@@ -148,12 +153,11 @@ def show_score():
     """
     It takes in the above arguements and shows the score at the given pos according to the color, font and size.
     """
-    font = pygame.font.Font('freesansbold.ttf', 30)
-    text = font.render(str(score), True, (255, 255, 255), (0, 0, 0))
+    font = pygame.font.Font('freesansbold.ttf', 20)
+    text = font.render("Score:"+str(score), True, (255, 255, 255), (0, 0, 0))
     textRect = text.get_rect()
-    textRect.center = (360, 40)
+    textRect.center = (80, 40)
     game_window.blit(text, textRect)
-    pygame.display.flip()
 
 
 
@@ -168,7 +172,7 @@ def update_screen():
     show_score()
     create_food()
     update_snake()
-
+    pygame.display.flip()
 
 
 
@@ -181,7 +185,7 @@ def game_over():
     It should write game over on the screen, show your score, wait for 3 seconds and then exit
     """
     font=pygame.font.Font('freesansbold.ttf',36)
-    game_ = font.render(str(score),True,(250,0,0))
+    game_ = font.render("GAME OVER!! Your score is "+str(score),True,(250,0,0))
     textRect1 = game_.get_rect()
     textRect1.center = (frame_size_x/2, 150)
     game_window.blit(game_,textRect1)  
@@ -204,4 +208,4 @@ while True:
     
 
     # To set the speed of the screen
-    fps_controller.tick(15)
+    fps_controller.tick(25)
